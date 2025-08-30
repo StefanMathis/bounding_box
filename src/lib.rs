@@ -3,6 +3,9 @@
 #[cfg(feature = "approx")]
 use approx::ulps_eq;
 
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 /**
 A rectilinear, 2-dimensional [bounding box](https://en.wikipedia.org/wiki/Minimum_bounding_rectangle).
 

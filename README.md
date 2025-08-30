@@ -3,8 +3,8 @@ bounding_box
 
 A lightweight library for handling 2D bounding boxes / bounding rectangles.
 
-[`BoundingBox`]: https://docs.rs/bounding_box/0.1.0/bounding_box/struct.BoundingBox.html
-[`ToBoundingBox`]: https://docs.rs/bounding_box/0.1.0/bounding_box/trait.ToBoundingBox.html
+[`BoundingBox`]: https://docs.rs/bounding_box/0.1.1/bounding_box/struct.BoundingBox.html
+[`ToBoundingBox`]: https://docs.rs/bounding_box/0.1.1/bounding_box/trait.ToBoundingBox.html
 
 A [minimum two-dimensional bounding box / bounding rectangle](https://en.wikipedia.org/wiki/Minimum_bounding_rectangle) describes the extents of an entity (shape, point set, line, ...) or a collection thereof in x-y coordinates. 
 
@@ -14,7 +14,7 @@ Another use case is to find the minimum space required for displaying an entity 
 
 This library offers a struct [`BoundingBox`] and a trait [`ToBoundingBox`] which can be used to obtain bounding boxes of types which implement it. The [`BoundingBox`] type has various methods to e.g. calculate its dimensions, find its center, transform it, unite it with other [`BoundingBox`] instances, find intersections between [`BoundingBox`] instances and many more ...
 
-The full API documentation is available at [https://docs.rs/bounding_box/0.1.0/bounding_box/](https://docs.rs/bounding_box/0.1.0/bounding_box/).
+The full API documentation is available at [https://docs.rs/bounding_box/0.1.1/bounding_box/](https://docs.rs/bounding_box/0.1.1/bounding_box/).
 
 As an example, the following code snippet shows how a [`BoundingBox`] can be used with a `Circle` type:
 
