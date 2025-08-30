@@ -122,4 +122,4 @@ Some methods of [`BoundingBox`] are gated behind the **approx** feature flag. En
 the [approx](https://crates.io/crates/approx) crate as a dependency. The gated methods are prefixed with `approx_`
 and are variants of other methods which habe absolute and ULPs (units of least precision) 
 tolerances as additional arguments. For example, `approx_contains_point` is the tolerance 
-variant of `contains_point` and checks if a given point is *approximately* in the bounding boxes.
+variant of `contains_point` and checks if a given point is *approximately* in the bounding box.
