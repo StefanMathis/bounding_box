@@ -106,7 +106,7 @@ assert_eq!(bb_all_pts.ymin(), -1.0);
 assert_eq!(bb_all_pts.ymax(), 1.0);
 ```
 
-# Crate features
+# Feature flags
 
 All features are disabled by default.
 
