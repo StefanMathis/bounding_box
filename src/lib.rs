@@ -16,6 +16,10 @@ The values defining a bounding box (`xmin`, `xmax`, `ymin`, `ymax`) are called "
 
 Since a bounding box only consists of four f64 values (32 bytes), it is cheap to copy, hence it implements
 the [`Copy`](https://doc.rust-lang.org/std/marker/trait.Copy.html) trait.
+
+# Features
+
+This struct can be serialized / deserialized if the `serde` feature is enabled.
  */
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -399,8 +403,6 @@ impl BoundingBox {
     This variant of [`BoundingBox::contains_point`] allows specifying an absolute and
     an [ULP](https://en.wikipedia.org/wiki/Unit_in_the_last_place) tolerance. These tolerances
     are used to check if the given point lies "approximately" on an edge of the bounding box.
-    This check is performed using the [`ulps_eq`](https://docs.rs/approx/latest/approx/macro.ulps_eq.html)
-    macro of the [approx] crate. Please see its documentation.
 
     # Examples
     ```
@@ -417,6 +419,11 @@ impl BoundingBox {
     // Check using a finer tolerance: Point is outside the bounding box
     assert!(!bb.approx_contains_point([1.0001, 1.0], 1e-6, 0));
     ```
+
+    # Features
+
+    This function uses the [`ulps_eq`](https://docs.rs/approx/latest/approx/macro.ulps_eq.html)
+    macro of the [approx] crate, therefore the `approx ` feature needs to be enabled.
      */
     #[cfg(feature = "approx")]
     pub fn approx_contains_point<T: Into<[f64; 2]>>(
@@ -494,6 +501,11 @@ impl BoundingBox {
     assert!(bb1.approx_contains(&bb2, 1e-3, 0));
     assert!(!bb1.approx_contains(&bb2, 1e-6, 0));
     ```
+
+    # Features
+
+    This function uses the [`ulps_eq`](https://docs.rs/approx/latest/approx/macro.ulps_eq.html)
+    macro of the [approx] crate, therefore the `approx ` feature needs to be enabled.
     */
     #[cfg(feature = "approx")]
     pub fn approx_contains(&self, other: &Self, epsilon: f64, max_ulps: u32) -> bool {
@@ -543,6 +555,11 @@ impl BoundingBox {
     assert!(bb1.approx_eq(&bb2, 1e-3, 0));
     assert!(!bb1.approx_eq(&bb2, 1e-6, 0));
     ```
+
+    # Features
+
+    This function uses the [`ulps_eq`](https://docs.rs/approx/latest/approx/macro.ulps_eq.html)
+    macro of the [approx] crate, therefore the `approx ` feature needs to be enabled.
      */
     #[cfg(feature = "approx")]
     pub fn approx_eq(&self, other: &Self, epsilon: f64, max_ulps: u32) -> bool {
@@ -665,6 +682,11 @@ impl BoundingBox {
     assert!(bb1.approx_touches(&bb2, 1e-3, 0));
     assert!(!bb1.approx_touches(&bb2, 1e-6, 0));
     ```
+
+    # Features
+
+    This function uses the [`ulps_eq`](https://docs.rs/approx/latest/approx/macro.ulps_eq.html)
+    macro of the [approx] crate, therefore the `approx ` feature needs to be enabled.
     */
     #[cfg(feature = "approx")]
     pub fn approx_touches(&self, other: &Self, epsilon: f64, max_ulps: u32) -> bool {
