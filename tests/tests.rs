@@ -1,4 +1,4 @@
-use bounding_box::{BoundingBox, ToBoundingBox};
+use bounding_box::BoundingBox;
 
 #[test]
 fn test_intersects() {
@@ -78,8 +78,9 @@ fn test_is_finite() {
 #[test]
 fn test_impl_to_bounding_box() {
     struct Dummy;
-    impl ToBoundingBox for Dummy {
-        fn bounding_box(&self) -> BoundingBox {
+
+    impl From<&Dummy> for BoundingBox {
+        fn from(_: &Dummy) -> Self {
             return BoundingBox::new(0.0, 1.0, 0.0, 1.0);
         }
     }
@@ -87,7 +88,7 @@ fn test_impl_to_bounding_box() {
     let dummy = Dummy {};
     let test_bb = BoundingBox::new(0.0, 1.0, 0.0, 1.0);
 
-    let bb = dummy.bounding_box();
+    let bb: BoundingBox = (&dummy).into();
     assert_eq!(bb, test_bb);
 
     // Use reference
@@ -95,7 +96,7 @@ fn test_impl_to_bounding_box() {
     assert_eq!(bb, test_bb);
 
     // Consuming
-    let bb = BoundingBox::from(dummy);
+    let bb = BoundingBox::from(&dummy);
     assert_eq!(bb, test_bb);
 }
 
@@ -115,4 +116,41 @@ fn test_from_nalgebra() {
     let bb = BoundingBox::new(0.0, 1.0, 0.0, 1.0);
     assert!(bb.contains_point(Point2::new(0.0, 0.0)));
     assert!(bb.contains_point(Vector2::new(0.0, 0.0)));
+}
+
+#[test]
+fn test_from_bounded_entities() {
+    struct Box {
+        xmin: f64,
+        xmax: f64,
+        ymin: f64,
+        ymax: f64,
+    }
+
+    impl From<&Box> for BoundingBox {
+        fn from(value: &Box) -> Self {
+            return BoundingBox::new(value.xmin, value.xmax, value.ymin, value.ymax);
+        }
+    }
+
+    {
+        let box1 = Box {
+            xmin: 0.0,
+            xmax: 1.0,
+            ymin: 0.0,
+            ymax: 1.0,
+        };
+        let box2 = Box {
+            xmin: 0.5,
+            xmax: 2.0,
+            ymin: 0.5,
+            ymax: 2.0,
+        };
+
+        let bb = BoundingBox::from_bounded_entities([&box1, &box2].into_iter()).unwrap();
+        assert_eq!(bb.xmin(), 0.0);
+        assert_eq!(bb.xmax(), 2.0);
+        assert_eq!(bb.ymin(), 0.0);
+        assert_eq!(bb.ymax(), 2.0);
+    }
 }

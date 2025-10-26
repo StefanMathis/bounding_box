@@ -9,13 +9,16 @@ use serde::{Deserialize, Serialize};
 /**
 A rectilinear, 2-dimensional [bounding box](https://en.wikipedia.org/wiki/Minimum_bounding_rectangle).
 
-A 2-dimensional rectilinear bounding box is described by four values: minimum x-value, maximum x-value,
-minimum y-value and and maximum y-value. This struct can be created either from any type which implements
-[`ToBoundingBox`] or from the constructors [`new`](BoundingBox::new) or [`try_new`](BoundingBox::try_new).
-The values defining a bounding box (`xmin`, `xmax`, `ymin`, `ymax`) are called "extremas".
+A 2-dimensional rectilinear bounding box is described by four values: minimum
+x-value, maximum x-value, minimum y-value and and maximum y-value. This struct
+can be created either from any type which implements [`Into<BoundingBox>`] or
+from the constructors [`new`](BoundingBox::new) or
+[`try_new`](BoundingBox::try_new). The values defining a bounding box (`xmin`,
+`xmax`, `ymin`, `ymax`) are called "extremas".
 
-Since a bounding box only consists of four f64 values (32 bytes), it is cheap to copy, hence it implements
-the [`Copy`](https://doc.rust-lang.org/std/marker/trait.Copy.html) trait.
+Since a bounding box only consists of four f64 values (32 bytes), it is cheap to
+copy, hence it implements the
+[`Copy`](https://doc.rust-lang.org/std/marker/trait.Copy.html) trait.
 
 # Features
 
@@ -277,24 +280,25 @@ impl BoundingBox {
     }
 
     /**
-    Creates a bounding box from an iterator over any types implementing [`ToBoundingBox`].
+    Creates a bounding box from an iterator over any types implementing
+    [`Into<BoundingBox>`].
 
     If the iterator is empty, this function returns `None`.
 
     ```
-    use bounding_box::{BoundingBox, ToBoundingBox};
+    use bounding_box::BoundingBox;
 
     struct Circle {
         center: [f64; 2],
         radius: f64
     }
 
-    impl ToBoundingBox for Circle {
-        fn bounding_box(&self) -> BoundingBox {
-            return BoundingBox::new(self.center[0] - self.radius,
-                                    self.center[0] + self.radius,
-                                    self.center[1] - self.radius,
-                                    self.center[1] + self.radius);
+    impl From<&Circle> for BoundingBox {
+        fn from(c: &Circle) -> BoundingBox {
+            return BoundingBox::new(c.center[0] - c.radius,
+                                    c.center[0] + c.radius,
+                                    c.center[1] - c.radius,
+                                    c.center[1] + c.radius);
         }
     }
 
@@ -309,13 +313,11 @@ impl BoundingBox {
     assert_eq!(bb.ymax(), 4.0);
      ```
      */
-    pub fn from_bounded_entities<'a, T: ToBoundingBox + ?Sized + 'a, I: Iterator<Item = &'a T>>(
+    pub fn from_bounded_entities<T: Into<BoundingBox>, I: Iterator<Item = T>>(
         mut entities: I,
     ) -> Option<Self> {
-        let first_bb = entities.next()?.bounding_box();
-        let bb = entities.fold(first_bb, |acc, drawable| {
-            drawable.bounding_box().union(&acc)
-        });
+        let first_bb: BoundingBox = entities.next()?.into();
+        let bb = entities.fold(first_bb, |acc, drawable| drawable.into().union(&acc));
         return Some(bb);
     }
 
@@ -882,52 +884,5 @@ impl BoundingBox {
             && self.xmax.is_finite()
             && self.ymin.is_finite()
             && self.ymax.is_finite();
-    }
-}
-
-/**
-A trait providing an interface to derive bounding boxes from types.
-
-This trait serves as an interface for types which know how to construct their
-own bounding box. See [`ToBoundingBox::bounding_box`] for an example.
- */
-pub trait ToBoundingBox {
-    /**
-    Creates the bounding box of the type.
-
-    # Examples
-    ```
-    use bounding_box::{BoundingBox, ToBoundingBox};
-
-    struct Circle {
-        center: [f64; 2],
-        radius: f64
-    }
-
-    impl ToBoundingBox for Circle {
-        fn bounding_box(&self) -> BoundingBox {
-            return BoundingBox::new(self.center[0] - self.radius,
-                                    self.center[0] + self.radius,
-                                    self.center[1] - self.radius,
-                                    self.center[1] + self.radius);
-        }
-    }
-
-    let c = Circle {center: [0.0, 0.0], radius: 1.0};
-    assert_eq!(c.bounding_box(), BoundingBox::new(-1.0, 1.0, -1.0, 1.0));
-    ```
-     */
-    fn bounding_box(&self) -> BoundingBox;
-}
-
-impl<T: ToBoundingBox + ?Sized> ToBoundingBox for &T {
-    fn bounding_box(&self) -> BoundingBox {
-        (*self).bounding_box()
-    }
-}
-
-impl<T: ToBoundingBox> From<T> for BoundingBox {
-    fn from(value: T) -> Self {
-        value.bounding_box()
     }
 }

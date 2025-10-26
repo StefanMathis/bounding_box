@@ -3,37 +3,53 @@ bounding_box
 
 A lightweight library for handling 2D bounding boxes / bounding rectangles.
 
-[`BoundingBox`]: https://docs.rs/bounding_box/0.1.2/bounding_box/struct.BoundingBox.html
-[`ToBoundingBox`]: https://docs.rs/bounding_box/0.1.2/bounding_box/trait.ToBoundingBox.html
-[`contains_point`]: https://docs.rs/bounding_box/0.1.2/bounding_box/struct.BoundingBox.html#method.contains_point
-[`approx_contains_point`]: https://docs.rs/bounding_box/0.1.2/bounding_box/struct.BoundingBox.html#method.approx_contains_point
+[`BoundingBox`]: https://docs.rs/bounding_box/0.2.0/bounding_box/struct.BoundingBox.html
+[`contains_point`]: https://docs.rs/bounding_box/0.2.0/bounding_box/struct.BoundingBox.html#method.contains_point
+[`approx_contains_point`]: https://docs.rs/bounding_box/0.2.0/bounding_box/struct.BoundingBox.html#method.approx_contains_point
 
-A [minimum two-dimensional bounding box / bounding rectangle](https://en.wikipedia.org/wiki/Minimum_bounding_rectangle) describes the extents of an entity (shape, point set, line, ...) or a collection thereof in x-y coordinates. 
+A [minimum two-dimensional bounding box / bounding rectangle](https://en.wikipedia.org/wiki/Minimum_bounding_rectangle)
+describes the extents of an entity (shape, point set, line, ...) or a collection thereof in x-y coordinates. 
 
-Bounding boxes are very useful in computational geometry. For example, if the bounding boxes of two entities don't intersect, the entities themselves also don't intersect. This property can be used to short-circuit intersection algorithms. In a similar fashion, they can be used as a first stage of an algorithm which checks if an entity contains a point. 
+Bounding boxes are very useful in computational geometry. For example, if the
+bounding boxes of two entities don't intersect, the entities themselves also
+don't intersect. This property can be used to short-circuit intersection
+algorithms. In a similar fashion, they can be used as a first stage of an
+algorithm which checks if an entity contains a point. 
 
-Another use case is to find the minimum space required for displaying an entity on a rectangular monitor. By comparing the bounding box to the actually available monitor space, scaling factors can be obtained so the entire entity can be shown on the monitor at once.
+Another use case is to find the minimum space required for displaying an entity
+on a rectangular monitor. By comparing the bounding box to the actually
+available monitor space, scaling factors can be obtained so the entire entity
+can be shown on the monitor at once.
 
-This library offers a struct [`BoundingBox`] and a trait [`ToBoundingBox`] which can be used to obtain bounding boxes of types which implement it. The [`BoundingBox`] type has various methods to e.g. calculate its dimensions, find its center, transform it, unite it with other [`BoundingBox`] instances, find intersections between [`BoundingBox`] instances and many more ...
+This library offers a ightweight struct [`BoundingBox`] (defined by only four
+`f64`) which has various methods to e.g. calculate its dimensions, find its
+center, transform it, unite it with other [`BoundingBox`] instances, find
+intersections between [`BoundingBox`] instances and many more ...
 
-The full API documentation is available at [https://docs.rs/bounding_box/0.1.2/bounding_box/](https://docs.rs/bounding_box/0.1.2/bounding_box/).
+It is recommended to implement `From<&T> for BoundingBox` for types which can
+derive a bounding box from themselves
 
-As an example, the following code snippet shows how a [`BoundingBox`] can be used with a `Circle` type:
+
+The full API documentation is available at
+[https://docs.rs/bounding_box/0.2.0/bounding_box/](https://docs.rs/bounding_box/0.2.0/bounding_box/).
+
+As an example, the following code snippet shows how a [`BoundingBox`] can be
+used with a `Circle` type:
 
 ```rust
-use bounding_box::{BoundingBox, ToBoundingBox};
+use bounding_box::BoundingBox;
 
 struct Circle {
     center: [f64; 2],
     radius: f64
 }
 
-impl ToBoundingBox for Circle {
-    fn bounding_box(&self) -> BoundingBox {
-        return BoundingBox::new(self.center[0] - self.radius, 
-                                self.center[0] + self.radius,
-                                self.center[1] - self.radius, 
-                                self.center[1] + self.radius);
+impl From<&Circle> for BoundingBox {
+    fn from(c: &Circle) -> BoundingBox {
+        return BoundingBox::new(c.center[0] - c.radius, 
+                                c.center[0] + c.radius,
+                                c.center[1] - c.radius, 
+                                c.center[1] + c.radius);
     }
 }
 
@@ -46,8 +62,8 @@ let c3 = Circle {center: [0.0, 2.0], radius: 2.0};
 
 /// This is an incomplete example of an intersection algorithm
 fn circles_intersect(left: &Circle, right: &Circle) -> &'static str {
-    let bb_l = left.bounding_box();
-    let bb_r = right.bounding_box();
+    let bb_l: BoundingBox = left.into();
+    let bb_r: BoundingBox = right.into();
 
     // Short-circuit the evaluation here
     if !(bb_l.intersects(&bb_r)) {
@@ -68,7 +84,7 @@ assert_eq!(circles_intersect(&c1, &c3), "The circles might intersect ...");
 
 /// This is an incomplete example of a containment check algorithm
 fn circle_contains_point(c: &Circle, pt: [f64; 2]) -> &'static str {
-    if !c.bounding_box().contains_point(pt) {
+    if !BoundingBox::from(c).contains_point(pt) {
         return "The point is not within the circle!";
     }
 
@@ -92,7 +108,7 @@ assert_eq!(bb_common_iter.ymin(), -1.0);
 assert_eq!(bb_common_iter.ymax(), 4.0);
 
 // Alternatively, the bounding box could also be found by manually uniting the individual bounding boxes
-let bb_common_man = c1.bounding_box().union(&c2.bounding_box().union(&c3.bounding_box()));
+let bb_common_man = BoundingBox::from(&c1).union(&BoundingBox::from(&c2).union(&BoundingBox::from(&c3)));
 assert_eq!(bb_common_man, bb_common_iter);
 ```
 
@@ -114,14 +130,17 @@ All features are disabled by default.
 
 ## Serialization and deserialization
 
-Bounding boxes can be serialized and deserialized using the [serde](https://crates.io/crates/serde) crate.
+Bounding boxes can be serialized and deserialized using the
+[serde](https://crates.io/crates/serde) crate.
 
 This functionality is gated behind the  `serde ` feature flag.
 
 ## Tolerances
 
-Some methods of [`BoundingBox`] are gated behind the  `approx ` feature flag. Enabling this flag adds
-the [approx](https://crates.io/crates/approx) crate as a dependency. The gated methods are prefixed with `approx_`
-and are variants of other methods which habe absolute and ULPs (units of least precision) 
-tolerances as additional arguments. For example, [`approx_contains_point`] is the tolerance 
-variant of [`contains_point`] and checks if a given point is *approximately* in the bounding box.
+Some methods of [`BoundingBox`] are gated behind the  `approx ` feature flag.
+Enabling this flag adds the [approx](https://crates.io/crates/approx) crate as a
+dependency. The gated methods are prefixed with `approx_` and are variants of
+other methods which habe absolute and ULPs (units of least precision) tolerances
+as additional arguments. For example, [`approx_contains_point`] is the tolerance 
+variant of [`contains_point`] and checks if a given point is *approximately* in
+the bounding box.
