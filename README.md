@@ -21,7 +21,7 @@ on a rectangular monitor. By comparing the bounding box to the actually
 available monitor space, scaling factors can be obtained so the entire entity
 can be shown on the monitor at once.
 
-This library offers a ightweight struct [`BoundingBox`] (defined by only four
+This library offers a lightweight struct [`BoundingBox`] (defined by only four
 `f64`) which has various methods to e.g. calculate its dimensions, find its
 center, transform it, unite it with other [`BoundingBox`] instances, find
 intersections between [`BoundingBox`] instances and many more ...
