@@ -133,7 +133,7 @@ All features are disabled by default.
 Bounding boxes can be serialized and deserialized using the
 [serde](https://crates.io/crates/serde) crate.
 
-This functionality is gated behind the  `serde ` feature flag.
+This functionality is gated behind the `serde` feature flag.
 
 ## Tolerances
 
