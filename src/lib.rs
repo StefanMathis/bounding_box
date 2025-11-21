@@ -6,6 +6,9 @@ use approx::ulps_eq;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+#[cfg(feature = "bincode")]
+use bincode::{Decode, Encode};
+
 /**
 A rectilinear, 2-dimensional [bounding box](https://en.wikipedia.org/wiki/Minimum_bounding_rectangle).
 
@@ -26,6 +29,7 @@ This struct can be serialized / deserialized if the `serde` feature is enabled.
  */
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "bincode", derive(Encode, Decode))]
 pub struct BoundingBox {
     xmin: f64,
     xmax: f64,
