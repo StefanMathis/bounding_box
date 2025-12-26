@@ -3,9 +3,10 @@ bounding_box
 
 A lightweight library for handling 2D bounding boxes / bounding rectangles.
 
-[`BoundingBox`]: https://docs.rs/bounding_box/0.2.0/bounding_box/struct.BoundingBox.html
-[`contains_point`]: https://docs.rs/bounding_box/0.2.0/bounding_box/struct.BoundingBox.html#method.contains_point
-[`approx_contains_point`]: https://docs.rs/bounding_box/0.2.0/bounding_box/struct.BoundingBox.html#method.approx_contains_point
+[`ToBoundingBox`]: https://docs.rs/bounding_box/0.3.0/bounding_box/trait.ToBoundingBox.html
+[`BoundingBox`]: https://docs.rs/bounding_box/0.3.0/bounding_box/struct.BoundingBox.html
+[`contains_point`]: https://docs.rs/bounding_box/0.3.0/bounding_box/struct.BoundingBox.html#method.contains_point
+[`approx_contains_point`]: https://docs.rs/bounding_box/0.3.0/bounding_box/struct.BoundingBox.html#method.approx_contains_point
 
 A [minimum two-dimensional bounding box / bounding rectangle](https://en.wikipedia.org/wiki/Minimum_bounding_rectangle)
 describes the extents of an entity (shape, point set, line, ...) or a collection thereof in x-y coordinates. 
@@ -27,17 +28,15 @@ center, transform it, unite it with other [`BoundingBox`] instances, find
 intersections between [`BoundingBox`] instances and many more ...
 
 It is recommended to implement `From<&T> for BoundingBox` for types which can
-derive a bounding box from themselves
-
-
-The full API documentation is available at
-[https://docs.rs/bounding_box/0.2.0/bounding_box/](https://docs.rs/bounding_box/0.2.0/bounding_box/).
+derive a bounding box from themselves. This also auto-implementes
+[`ToBoundingBox`], which provides a method `to_bounding_box` which can directly
+be called from `T`.
 
 As an example, the following code snippet shows how a [`BoundingBox`] can be
 used with a `Circle` type:
 
 ```rust
-use bounding_box::BoundingBox;
+use bounding_box::*;
 
 struct Circle {
     center: [f64; 2],
@@ -56,6 +55,9 @@ impl From<&Circle> for BoundingBox {
 let c1 = Circle {center: [0.0, 0.0], radius: 1.0};
 let c2 = Circle {center: [0.0, 2.0], radius: 1.0};
 let c3 = Circle {center: [0.0, 2.0], radius: 2.0};
+
+// Method to_bounding_box is auto-implemented
+assert_eq!(BoundingBox::from(&c1), c1.to_bounding_box());
 
 // ===============================================================
 // Intersection
@@ -117,12 +119,15 @@ The following code snippet shows how to find the smallest bounding box containin
 ```rust
 use bounding_box::BoundingBox;
 
-let bb_all_pts = BoundingBox::from_vertices([[-1.0, -1.0], [1.0, 1.0]].into_iter()).expect("iterator has at least one element");
+let bb_all_pts = BoundingBox::from_points([[-1.0, -1.0], [1.0, 1.0]].into_iter()).expect("iterator has at least one element");
 assert_eq!(bb_all_pts.xmin(), -1.0);
 assert_eq!(bb_all_pts.xmax(), 1.0);
 assert_eq!(bb_all_pts.ymin(), -1.0);
 assert_eq!(bb_all_pts.ymax(), 1.0);
 ```
+
+The full API documentation is available at
+[https://docs.rs/bounding_box/0.3.0/bounding_box/](https://docs.rs/bounding_box/0.3.0/bounding_box/).
 
 # Feature flags
 
@@ -138,7 +143,7 @@ This functionality is gated behind the `serde` feature flag.
 ## Tolerances
 
 Some methods of [`BoundingBox`] are gated behind the  `approx ` feature flag.
-Enabling this flag adds the [approx](https://crates.io/crates/approx) crate as a
+Enabling this flag adds the [approxim](https://crates.io/crates/approxim) crate as a
 dependency. The gated methods are prefixed with `approx_` and are variants of
 other methods which habe absolute and ULPs (units of least precision) tolerances
 as additional arguments. For example, [`approx_contains_point`] is the tolerance 

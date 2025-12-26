@@ -241,16 +241,14 @@ impl BoundingBox {
         [1.0, -6.0],
     ];
 
-     let bb = BoundingBox::from_vertices(verts.into_iter()).expect("iterator yields at least one elment");
+     let bb = BoundingBox::from_points(verts.into_iter()).expect("iterator yields at least one elment");
      assert_eq!(bb.xmin(), -5.0);
      assert_eq!(bb.xmax(), 7.0);
      assert_eq!(bb.ymin(), -12.3);
      assert_eq!(bb.ymax(), 11.0);
      ```
      */
-    pub fn from_vertices<'a, T: Into<[f64; 2]>, I: Iterator<Item = T>>(
-        mut verts: I,
-    ) -> Option<Self> {
+    pub fn from_points<'a, T: Into<[f64; 2]>, I: Iterator<Item = T>>(mut verts: I) -> Option<Self> {
         match verts.next() {
             Some(pt) => {
                 let pt: [f64; 2] = pt.into();
@@ -884,5 +882,78 @@ impl BoundingBox {
             && self.xmax.is_finite()
             && self.ymin.is_finite()
             && self.ymax.is_finite();
+    }
+}
+
+/**
+This trait provides an associated method
+[`to_bounding_box`](ToBoundingBox::to_bounding_box) for all types `T` which
+implement [`Into<BoundingBox>`] for a shared reference `T` and therefore avoids
+typing `BoundingBox::from(&T)`:
+
+```
+use bounding_box::{BoundingBox, ToBoundingBox};
+
+struct Circle {
+    center: [f64; 2],
+    radius: f64
+}
+
+impl From<&Circle> for BoundingBox {
+    fn from(c: &Circle) -> BoundingBox {
+        return BoundingBox::new(c.center[0] - c.radius,
+                                c.center[0] + c.radius,
+                                c.center[1] - c.radius,
+                                c.center[1] + c.radius);
+    }
+}
+
+let c = Circle {center: [0.0, 0.0], radius: 1.0};
+assert_eq!(c.to_bounding_box(), BoundingBox::from(&c));
+```
+
+Of course this trait can also be implemented manually, but it is heavily
+recommended to instead implement `From<&T> for BoundingBox` instead.
+ */
+pub trait ToBoundingBox {
+    /**
+    Returns a bounding box for the implementor.
+
+    # Example
+
+    ```
+    use bounding_box::{BoundingBox, ToBoundingBox};
+
+    struct Circle {
+        center: [f64; 2],
+        radius: f64
+    }
+
+    impl From<&Circle> for BoundingBox {
+        fn from(c: &Circle) -> BoundingBox {
+            return BoundingBox::new(c.center[0] - c.radius,
+                                    c.center[0] + c.radius,
+                                    c.center[1] - c.radius,
+                                    c.center[1] + c.radius);
+        }
+    }
+
+    let c = Circle {center: [0.0, 0.0], radius: 1.0};
+    let bb = c.to_bounding_box();
+    assert_eq!(bb.xmin(), -1.0);
+    assert_eq!(bb.ymin(), -1.0);
+    assert_eq!(bb.xmax(), 1.0);
+    assert_eq!(bb.ymax(), 1.0);
+    ```
+     */
+    fn to_bounding_box(&self) -> BoundingBox;
+}
+
+impl<T> ToBoundingBox for T
+where
+    for<'a> &'a T: Into<BoundingBox>,
+{
+    fn to_bounding_box(&self) -> BoundingBox {
+        self.into()
     }
 }

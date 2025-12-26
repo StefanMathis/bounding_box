@@ -1,4 +1,4 @@
-use bounding_box::BoundingBox;
+use bounding_box::*;
 
 #[test]
 fn test_intersects() {
@@ -153,4 +153,33 @@ fn test_from_bounded_entities() {
         assert_eq!(bb.ymin(), 0.0);
         assert_eq!(bb.ymax(), 2.0);
     }
+}
+
+#[test]
+fn test_to_bounding_box() {
+    struct Circle {
+        center: [f64; 2],
+        radius: f64,
+    }
+
+    impl From<&Circle> for BoundingBox {
+        fn from(c: &Circle) -> BoundingBox {
+            return BoundingBox::new(
+                c.center[0] - c.radius,
+                c.center[0] + c.radius,
+                c.center[1] - c.radius,
+                c.center[1] + c.radius,
+            );
+        }
+    }
+
+    let c = Circle {
+        center: [2.0, 2.0],
+        radius: 2.0,
+    };
+    let bb = c.to_bounding_box();
+    assert_eq!(bb.xmin(), 0.0);
+    assert_eq!(bb.ymin(), 0.0);
+    assert_eq!(bb.xmax(), 4.0);
+    assert_eq!(bb.ymax(), 4.0);
 }
