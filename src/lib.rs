@@ -887,7 +887,7 @@ impl BoundingBox {
 
 /**
 This trait provides an associated method
-[`to_bounding_box`](ToBoundingBox::to_bounding_box) for all types `T` which
+[`bounding_box`](ToBoundingBox::bounding_box) for all types `T` which
 implement [`Into<BoundingBox>`] for a shared reference `T` and therefore avoids
 typing `BoundingBox::from(&T)`:
 
@@ -909,7 +909,7 @@ impl From<&Circle> for BoundingBox {
 }
 
 let c = Circle {center: [0.0, 0.0], radius: 1.0};
-assert_eq!(c.to_bounding_box(), BoundingBox::from(&c));
+assert_eq!(c.bounding_box(), BoundingBox::from(&c));
 ```
 
 Of course this trait can also be implemented manually, but it is heavily
@@ -939,21 +939,21 @@ pub trait ToBoundingBox {
     }
 
     let c = Circle {center: [0.0, 0.0], radius: 1.0};
-    let bb = c.to_bounding_box();
+    let bb = c.bounding_box();
     assert_eq!(bb.xmin(), -1.0);
     assert_eq!(bb.ymin(), -1.0);
     assert_eq!(bb.xmax(), 1.0);
     assert_eq!(bb.ymax(), 1.0);
     ```
      */
-    fn to_bounding_box(&self) -> BoundingBox;
+    fn bounding_box(&self) -> BoundingBox;
 }
 
 impl<T> ToBoundingBox for T
 where
     for<'a> &'a T: Into<BoundingBox>,
 {
-    fn to_bounding_box(&self) -> BoundingBox {
+    fn bounding_box(&self) -> BoundingBox {
         self.into()
     }
 }

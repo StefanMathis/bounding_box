@@ -177,7 +177,7 @@ fn test_to_bounding_box() {
         center: [2.0, 2.0],
         radius: 2.0,
     };
-    let bb = c.to_bounding_box();
+    let bb = c.bounding_box();
     assert_eq!(bb.xmin(), 0.0);
     assert_eq!(bb.ymin(), 0.0);
     assert_eq!(bb.xmax(), 4.0);

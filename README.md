@@ -3,10 +3,10 @@ bounding_box
 
 A lightweight library for handling 2D bounding boxes / bounding rectangles.
 
-[`ToBoundingBox`]: https://docs.rs/bounding_box/0.3.0/bounding_box/trait.ToBoundingBox.html
-[`BoundingBox`]: https://docs.rs/bounding_box/0.3.0/bounding_box/struct.BoundingBox.html
-[`contains_point`]: https://docs.rs/bounding_box/0.3.0/bounding_box/struct.BoundingBox.html#method.contains_point
-[`approx_contains_point`]: https://docs.rs/bounding_box/0.3.0/bounding_box/struct.BoundingBox.html#method.approx_contains_point
+[`ToBoundingBox`]: https://docs.rs/bounding_box/0.4.0/bounding_box/trait.ToBoundingBox.html
+[`BoundingBox`]: https://docs.rs/bounding_box/0.4.0/bounding_box/struct.BoundingBox.html
+[`contains_point`]: https://docs.rs/bounding_box/0.4.0/bounding_box/struct.BoundingBox.html#method.contains_point
+[`approx_contains_point`]: https://docs.rs/bounding_box/0.4.0/bounding_box/struct.BoundingBox.html#method.approx_contains_point
 
 A [minimum two-dimensional bounding box / bounding rectangle](https://en.wikipedia.org/wiki/Minimum_bounding_rectangle)
 describes the extents of an entity (shape, point set, line, ...) or a collection thereof in x-y coordinates. 
@@ -29,7 +29,7 @@ intersections between [`BoundingBox`] instances and many more ...
 
 It is recommended to implement `From<&T> for BoundingBox` for types which can
 derive a bounding box from themselves. This also auto-implementes
-[`ToBoundingBox`], which provides a method `to_bounding_box` which can directly
+[`ToBoundingBox`], which provides a method `bounding_box` which can directly
 be called from `T`.
 
 As an example, the following code snippet shows how a [`BoundingBox`] can be
@@ -56,8 +56,8 @@ let c1 = Circle {center: [0.0, 0.0], radius: 1.0};
 let c2 = Circle {center: [0.0, 2.0], radius: 1.0};
 let c3 = Circle {center: [0.0, 2.0], radius: 2.0};
 
-// Method to_bounding_box is auto-implemented
-assert_eq!(BoundingBox::from(&c1), c1.to_bounding_box());
+// Method bounding_box is auto-implemented
+assert_eq!(BoundingBox::from(&c1), c1.bounding_box());
 
 // ===============================================================
 // Intersection
@@ -127,7 +127,7 @@ assert_eq!(bb_all_pts.ymax(), 1.0);
 ```
 
 The full API documentation is available at
-[https://docs.rs/bounding_box/0.3.0/bounding_box/](https://docs.rs/bounding_box/0.3.0/bounding_box/).
+[https://docs.rs/bounding_box/0.4.0/bounding_box/](https://docs.rs/bounding_box/0.4.0/bounding_box/).
 
 # Feature flags
 
