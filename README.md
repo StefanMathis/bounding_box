@@ -9,7 +9,12 @@ A lightweight library for handling 2D bounding boxes / bounding rectangles.
 [`approx_contains_point`]: https://docs.rs/bounding_box/0.4.0/bounding_box/struct.BoundingBox.html#method.approx_contains_point
 
 A [minimum two-dimensional bounding box / bounding rectangle](https://en.wikipedia.org/wiki/Minimum_bounding_rectangle)
-describes the extents of an entity (shape, point set, line, ...) or a collection thereof in x-y coordinates. 
+describes the extents of an entity (shape, point set, line, ...) or a collection
+thereof in x-y coordinates. 
+
+> **Feedback welcome!**  
+> Found a bug, missing docs, or have a feature request?  
+> Please open an issue on GitHub.
 
 Bounding boxes are very useful in computational geometry. For example, if the
 bounding boxes of two entities don't intersect, the entities themselves also
