@@ -885,6 +885,18 @@ impl BoundingBox {
     }
 }
 
+impl From<[f64; 2]> for BoundingBox {
+    fn from(v: [f64; 2]) -> Self {
+        return (&v).into();
+    }
+}
+
+impl From<&'_ [f64; 2]> for BoundingBox {
+    fn from(v: &'_ [f64; 2]) -> Self {
+        return BoundingBox::new(v[0], v[0], v[1], v[1]);
+    }
+}
+
 /**
 This trait provides an associated method
 [`bounding_box`](ToBoundingBox::bounding_box) for all types `T` which

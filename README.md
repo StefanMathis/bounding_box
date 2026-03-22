@@ -3,10 +3,10 @@ bounding_box
 
 A lightweight library for handling 2D bounding boxes / bounding rectangles.
 
-[`ToBoundingBox`]: https://docs.rs/bounding_box/0.4.0/bounding_box/trait.ToBoundingBox.html
-[`BoundingBox`]: https://docs.rs/bounding_box/0.4.0/bounding_box/struct.BoundingBox.html
-[`contains_point`]: https://docs.rs/bounding_box/0.4.0/bounding_box/struct.BoundingBox.html#method.contains_point
-[`approx_contains_point`]: https://docs.rs/bounding_box/0.4.0/bounding_box/struct.BoundingBox.html#method.approx_contains_point
+[`ToBoundingBox`]: https://docs.rs/bounding_box/0.4.1/bounding_box/trait.ToBoundingBox.html
+[`BoundingBox`]: https://docs.rs/bounding_box/0.4.1/bounding_box/struct.BoundingBox.html
+[`contains_point`]: https://docs.rs/bounding_box/0.4.1/bounding_box/struct.BoundingBox.html#method.contains_point
+[`approx_contains_point`]: https://docs.rs/bounding_box/0.4.1/bounding_box/struct.BoundingBox.html#method.approx_contains_point
 
 A [minimum two-dimensional bounding box / bounding rectangle](https://en.wikipedia.org/wiki/Minimum_bounding_rectangle)
 describes the extents of an entity (shape, point set, line, ...) or a collection
@@ -132,7 +132,7 @@ assert_eq!(bb_all_pts.ymax(), 1.0);
 ```
 
 The full API documentation is available at
-[https://docs.rs/bounding_box/0.4.0/bounding_box/](https://docs.rs/bounding_box/0.4.0/bounding_box/).
+[https://docs.rs/bounding_box/0.4.1/bounding_box/](https://docs.rs/bounding_box/0.4.1/bounding_box/).
 
 # Feature flags
 
