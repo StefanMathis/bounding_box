@@ -1,7 +1,11 @@
 bounding_box
 ============
 
+[![Documentation](https://docs.rs/bounding_box/badge.svg)](https://docs.rs/bounding_box)
+
 A lightweight library for handling 2D bounding boxes / bounding rectangles.
+
+The full API documentation is available at https://docs.rs/bounding_box/0.4.1/bounding_box.
 
 [`ToBoundingBox`]: https://docs.rs/bounding_box/0.4.1/bounding_box/trait.ToBoundingBox.html
 [`BoundingBox`]: https://docs.rs/bounding_box/0.4.1/bounding_box/struct.BoundingBox.html
