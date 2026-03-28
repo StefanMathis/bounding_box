@@ -1,4 +1,14 @@
-#![doc = include_str!("../README.md")]
+/*!
+[`ToBoundingBox`]: crate::ToBoundingBox
+[`BoundingBox`]: crate::BoundingBox
+[`contains_point`]: crate::BoundingBox::contains_point
+[`approx_contains_point`]: crate::BoundingBox::approx_contains_point
+
+A library for rectilinear, 2-dimensional bounding boxes.
+
+ */
+#![doc = include_str!("../docs/main.md")]
+#![deny(missing_docs)]
 
 #[cfg(feature = "approx")]
 use approx::ulps_eq;
