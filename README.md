@@ -5,16 +5,16 @@ bounding_box
 docs/main.md and (if available docs/end.md). Do not modify this file, instead
 modify the components. -->
 
-[`ToBoundingBox`]: https://docs.rs/bounding_box/0.4.2/bounding_box/trait.ToBoundingBox.html
-[`BoundingBox`]: https://docs.rs/bounding_box/0.4.2/bounding_box/struct.BoundingBox.html
-[`contains_point`]: https://docs.rs/bounding_box/0.4.2/bounding_box/struct.BoundingBox.html#method.contains_point
-[`approx_contains_point`]: https://docs.rs/bounding_box/0.4.1/bounding_box/struct.BoundingBox.html#method.approx_contains_point
+[`ToBoundingBox`]: https://docs.rs/bounding_box/0.5.0/bounding_box/trait.ToBoundingBox.html
+[`BoundingBox`]: https://docs.rs/bounding_box/0.5.0/bounding_box/struct.BoundingBox.html
+[`covers_point`]: https://docs.rs/bounding_box/0.5.0/bounding_box/struct.BoundingBox.html#method.covers_point
+[`approx_covers_point`]: https://docs.rs/bounding_box/0.4.1/bounding_box/struct.BoundingBox.html#method.approx_covers_point
 
 [![Documentation](https://docs.rs/bounding_box/badge.svg)](https://docs.rs/bounding_box)
 
 A library for rectilinear, 2-dimensional bounding boxes.
 
-The full API documentation is available at https://docs.rs/bounding_box/0.4.2/bounding_box.
+The full API documentation is available at https://docs.rs/bounding_box/0.5.0/bounding_box.
 
 > **Feedback welcome!**  
 > Found a bug, missing docs, or have a feature request?  
@@ -28,7 +28,7 @@ Bounding boxes are very useful in computational geometry. For example, if the
 bounding boxes of two entities don't intersect, the entities themselves also
 don't intersect. This property can be used to short-circuit intersection
 algorithms. In a similar fashion, they can be used as a first stage of an
-algorithm which checks if an entity contains a point. 
+algorithm which checks if an entity covers a point. 
 
 Another use case is to find the minimum space required for displaying an entity
 on a rectangular monitor. By comparing the bounding box to the actually
@@ -40,13 +40,12 @@ This library offers a lightweight struct [`BoundingBox`] (defined by only four
 center, transform it, unite it with other [`BoundingBox`] instances, find
 intersections between [`BoundingBox`] instances and many more ...
 
-It is recommended to implement `From<&T> for BoundingBox` for types which can
-derive a bounding box from themselves. This also auto-implementes
-[`ToBoundingBox`], which provides a method `bounding_box` which can directly
-be called from `T`.
+Additionally, the trait [`ToBoundingBox`] is defined as a standardized interface
+for deriving a [`BoundingBox`] from a type `T`. Implementing it also provides
+a `From<&T> for BoundingBox` implementation.
 
-As an example, the following code snippet shows how a [`BoundingBox`] can be
-used with a `Circle` type:
+The following code snippet shows how a [`BoundingBox`] can be used with a
+`Circle` type:
 
 ```rust
 use bounding_box::*;
@@ -56,20 +55,20 @@ struct Circle {
     radius: f64
 }
 
-impl From<&Circle> for BoundingBox {
-    fn from(c: &Circle) -> BoundingBox {
-        return BoundingBox::new(c.center[0] - c.radius, 
-                                c.center[0] + c.radius,
-                                c.center[1] - c.radius, 
-                                c.center[1] + c.radius);
+impl ToBoundingBox for Circle {
+    fn bounding_box(&self) -> BoundingBox {
+        return BoundingBox::new(self.center[0] - self.radius,
+                                self.center[0] + self.radius,
+                                self.center[1] - self.radius,
+                                self.center[1] + self.radius);
     }
 }
 
 let c1 = Circle {center: [0.0, 0.0], radius: 1.0};
-let c2 = Circle {center: [0.0, 2.0], radius: 1.0};
+let c2 = Circle {center: [0.0, 3.0], radius: 1.0};
 let c3 = Circle {center: [0.0, 2.0], radius: 2.0};
 
-// Method bounding_box is auto-implemented
+// From(&TY) is auto-implemented
 assert_eq!(BoundingBox::from(&c1), c1.bounding_box());
 
 // ===============================================================
@@ -98,8 +97,8 @@ assert_eq!(circles_intersect(&c1, &c3), "The circles might intersect ...");
 // Contains a point
 
 /// This is an incomplete example of a containment check algorithm
-fn circle_contains_point(c: &Circle, pt: [f64; 2]) -> &'static str {
-    if !BoundingBox::from(c).contains_point(pt) {
+fn circle_covers_point(c: &Circle, pt: [f64; 2]) -> &'static str {
+    if !BoundingBox::from(c).covers_point(pt) {
         return "The point is not within the circle!";
     }
 
@@ -109,8 +108,8 @@ fn circle_contains_point(c: &Circle, pt: [f64; 2]) -> &'static str {
     return "The point might be within the circle ...";
 }
 
-assert_eq!(circle_contains_point(&c1, [5.0, 1.0]), "The point is not within the circle!");
-assert_eq!(circle_contains_point(&c1, [0.0, 0.5]), "The point might be within the circle ...");
+assert_eq!(circle_covers_point(&c1, [5.0, 1.0]), "The point is not within the circle!");
+assert_eq!(circle_covers_point(&c1, [0.0, 0.5]), "The point might be within the circle ...");
 
 // ===============================================================
 // Find the common bounding box of all circles
@@ -156,6 +155,6 @@ Some methods of [`BoundingBox`] are gated behind the  `approx ` feature flag.
 Enabling this flag adds the [approxim](https://crates.io/crates/approxim) crate as a
 dependency. The gated methods are prefixed with `approx_` and are variants of
 other methods which habe absolute and ULPs (units of least precision) tolerances
-as additional arguments. For example, [`approx_contains_point`] is the tolerance 
-variant of [`contains_point`] and checks if a given point is *approximately* in
-the bounding box.
+as additional arguments. For example, [`approx_covers_point`] is the tolerance 
+variant of [`covers_point`] and checks if a given point is *approximately*
+covered by the bounding box.

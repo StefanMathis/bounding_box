@@ -1,8 +1,8 @@
 /*!
 [`ToBoundingBox`]: crate::ToBoundingBox
 [`BoundingBox`]: crate::BoundingBox
-[`contains_point`]: crate::BoundingBox::contains_point
-[`approx_contains_point`]: crate::BoundingBox::approx_contains_point
+[`covers_point`]: crate::BoundingBox::covers_point
+[`approx_covers_point`]: crate::BoundingBox::approx_covers_point
 
 A library for rectilinear, 2-dimensional bounding boxes.
 
@@ -332,7 +332,7 @@ impl BoundingBox {
     /**
     Creates the union of two bounding boxes.
 
-    The union of two bounding boxes is the minimum bounding box which contains both bounding boxes.
+    The union of two bounding boxes is the minimum bounding box which covers both bounding boxes.
 
     # Examples
 
@@ -383,9 +383,22 @@ impl BoundingBox {
     }
 
     /**
-    Returns true if `self` contains a given point.
+    Returns true if `self` covers a given point.
 
-    A point is also seen as included if it is located on the edge of a bounding box.
+    A point is "covered" by the bounding box if it is either within or on the
+    boundaries of `self`. Mathematically speaking, the following two
+    inequalities must be true:
+
+    `self.xmin() <= point[0] <= self.xmax()`
+
+    `self.ymin() <= point[1] <= self.ymax()`
+
+    If the boundaries should be excluded, use [`BoundingBox::contains_point`]
+    instead.
+
+    If the feature flag `approx` is enabled, the method
+    [`BoundingBox::approx_covers_point`] is made available, which allows
+    providing tolerances for the aforementioned inequalities.
 
     # Examples
     ```
@@ -393,26 +406,26 @@ impl BoundingBox {
 
     let bb = BoundingBox::new(0.0, 1.0, 0.0, 1.0);
 
-    assert!(bb.contains_point([0.5, 0.5]));
-    assert!(bb.contains_point([0.0, 0.0]));
-    assert!(bb.contains_point([0.0, 0.0]));
-    assert!(!bb.contains_point([-1.0, 0.0]));
-    assert!(!bb.contains_point([0.0, 2.0]));
+    assert!(bb.covers_point([0.5, 0.5]));
+    assert!(bb.covers_point([0.0, 0.0])); // On boundary
+    assert!(!bb.covers_point([-1.0, 0.0]));
+    assert!(!bb.covers_point([0.0, 2.0]));
      */
-    pub fn contains_point<T: Into<[f64; 2]>>(&self, point: T) -> bool {
+    pub fn covers_point<T: Into<[f64; 2]>>(&self, point: T) -> bool {
         let point: [f64; 2] = point.into();
-        return (self.xmin < point[0] || self.xmin == point[0])
-            && (self.ymin < point[1] || self.ymin == point[1])
-            && (self.xmax > point[0] || self.xmax == point[0])
-            && (self.ymax > point[1] || self.ymax == point[1]);
+        return self.xmin <= point[0]
+            && self.ymin <= point[1]
+            && self.xmax >= point[0]
+            && self.ymax >= point[1];
     }
 
     /**
-    Like [`BoundingBox::contains_point`], but with absolute and ULPs tolerances.
+    Like [`BoundingBox::covers_point`], but with absolute and ULPs tolerances.
 
-    This variant of [`BoundingBox::contains_point`] allows specifying an absolute and
-    an [ULP](https://en.wikipedia.org/wiki/Unit_in_the_last_place) tolerance. These tolerances
-    are used to check if the given point lies "approximately" on an edge of the bounding box.
+    This variant of [`BoundingBox::covers_point`] allows specifying an absolute
+    and an [ULP](https://en.wikipedia.org/wiki/Unit_in_the_last_place)
+    tolerance. These tolerances  are used to check if the given point lies
+    "approximately" on an edge of the bounding box.
 
     # Examples
     ```
@@ -421,22 +434,22 @@ impl BoundingBox {
     let bb = BoundingBox::new(0.0, 1.0, 0.0, 1.0);
 
     // Exact check: Point is outside the bounding box
-    assert!(!bb.contains_point([1.0001, 1.0]));
+    assert!(!bb.covers_point([1.0001, 1.0]));
 
     // Check using tolerances: Point is inside bounding box
-    assert!(bb.approx_contains_point([1.0001, 1.0], 1e-3, 0));
+    assert!(bb.approx_covers_point([1.0001, 1.0], 1e-3, 0));
 
     // Check using a finer tolerance: Point is outside the bounding box
-    assert!(!bb.approx_contains_point([1.0001, 1.0], 1e-6, 0));
+    assert!(!bb.approx_covers_point([1.0001, 1.0], 1e-6, 0));
     ```
 
     # Features
 
-    This function uses the [`ulps_eq`](https://docs.rs/approx/latest/approx/macro.ulps_eq.html)
-    macro of the [approx] crate, therefore the `approx ` feature needs to be enabled.
+    This function uses the [`ulps_eq`] macro of the [approx] crate, therefore
+    the `approx` feature needs to be enabled.
      */
     #[cfg(feature = "approx")]
-    pub fn approx_contains_point<T: Into<[f64; 2]>>(
+    pub fn approx_covers_point<T: Into<[f64; 2]>>(
         &self,
         point: T,
         epsilon: f64,
@@ -454,37 +467,81 @@ impl BoundingBox {
     }
 
     /**
-    Returns true if `self` contains `other`.
+    Returns true if `self` contains a given point.
 
-    A bounding box contains another bounding box, if the latter can be placed inside the former.
-    This is true even if the boxes share some extremums. This also means that a bounding box always contains itself (see examples).
+    A point is "contained" by the bounding box if it is within the boundaries of
+    `self`. Mathematically speaking, the following two inequalities must be true:
+
+    `self.xmin() < point[0] < self.xmax()`
+
+    `self.ymin() < point[1] < self.ymax()`
+
+    If the boundaries should be included, use [`BoundingBox::covers_point`]
+    instead.
 
     # Examples
     ```
     use bounding_box::BoundingBox;
 
-    // bb1 contains bb2, but not the other way around
+    let bb = BoundingBox::new(0.0, 1.0, 0.0, 1.0);
+
+    assert!(bb.contains_point([0.5, 0.5]));
+    assert!(!bb.contains_point([0.0, 0.0])); // On boundary
+    assert!(!bb.contains_point([-1.0, 0.0]));
+    assert!(!bb.contains_point([0.0, 2.0]));
+     */
+    pub fn contains_point<T: Into<[f64; 2]>>(&self, point: T) -> bool {
+        let point: [f64; 2] = point.into();
+        return self.xmin < point[0]
+            && self.ymin < point[1]
+            && self.xmax > point[0]
+            && self.ymax > point[1];
+    }
+
+    /**
+    Returns true if `self` covers `other`.
+
+    A bounding box "covers" another bounding box, if every point covered by the
+    second box is also covered by the first one according to the definition
+    given in [`BoundingBox::covers_point`]:
+
+    `self.xmin() <= other.xmin() <= other.xmax() <= self.xmax()`
+
+    `self.ymin() <= other.ymin() <= other.ymax() <= self.ymax()`
+
+    If the boundaries of `self` should be excluded, use [`BoundingBox::covers`]
+    instead.
+
+    If the feature flag `approx` is enabled, the method
+    [`BoundingBox::approx_covers] is made available, which allows
+    providing tolerances for the aforementioned inequalities.
+
+    # Examples
+    ```
+    use bounding_box::BoundingBox;
+
+    // bb1 covers bb2, but not the other way around
     let bb1 = BoundingBox::new(0.0, 1.0, 0.0, 1.0);
     let bb2 = BoundingBox::new(0.2, 0.8, 0.2, 0.8);
-    assert!(bb1.contains(&bb2));
-    assert!(!bb2.contains(&bb1));
+    assert!(bb1.covers(&bb2));
+    assert!(!bb2.covers(&bb1));
 
-    // bb1 contains itself
-    assert!(bb1.contains(&bb1));
+    // bb1 covers itself
+    assert!(bb1.covers(&bb1));
 
     // bb1 and bb2 share a border
     let bb1 = BoundingBox::new(0.0, 1.0, 0.0, 1.0);
     let bb2 = BoundingBox::new(0.2, 1.0, 0.2, 0.8);
-    assert!(bb1.contains(&bb2));
+    assert!(bb1.covers(&bb2));
 
-    // bb1 and bb2 are separated from each other, and therefore neither of one contains the other
+    // bb1 and bb2 are separated from each other, and therefore neither one covers the other
     let bb1 = BoundingBox::new(0.0, 1.0, 0.0, 1.0);
     let bb2 = BoundingBox::new(2.0, 3.0, 2.0, 3.0);
-    assert!(!bb1.contains(&bb2));
-    assert!(!bb2.contains(&bb1));
+    assert!(!bb1.covers(&bb2));
+    assert!(!bb2.covers(&bb1));
     ```
     */
-    pub fn contains(&self, other: &Self) -> bool {
+    pub fn covers(&self, other: &Self) -> bool {
         return self.xmin <= other.xmin
             && self.ymin <= other.ymin
             && self.xmax >= other.xmax
@@ -492,33 +549,32 @@ impl BoundingBox {
     }
 
     /**
-    Like [`BoundingBox::contains`], but with absolute and ULPs tolerances.
+    Like [`BoundingBox::covers`], but with absolute and ULPs tolerances.
 
-    This variant of [`BoundingBox::contains`] allows specifying an absolute and
-    an [ULP](https://en.wikipedia.org/wiki/Unit_in_the_last_place) tolerance. These tolerances
-    are used to check if the extremas of the boxes are "approximately" equal.
-    This check is performed using the [`ulps_eq`](https://docs.rs/approx/latest/approx/macro.ulps_eq.html)
-    macro of the [approx] crate. Please see its documentation.
+    This variant of [`BoundingBox::covers`] allows specifying an absolute and
+    an [ULP](https://en.wikipedia.org/wiki/Unit_in_the_last_place) tolerance.
+    These tolerances are used to check if the extremas of the boxes are
+    "approximately" equal.
 
     ```
     use bounding_box::BoundingBox;
 
-    // bb1 contains bb2 depending on the selected tolerances
+    // bb1 covers bb2 depending on the selected tolerances
     let bb1 = BoundingBox::new(0.0, 1.0, 0.0, 1.0);
     let bb2 = BoundingBox::new(0.0, 1.0001, 0.0, 0.5);
 
-    assert!(!bb1.contains(&bb2));
-    assert!(bb1.approx_contains(&bb2, 1e-3, 0));
-    assert!(!bb1.approx_contains(&bb2, 1e-6, 0));
+    assert!(!bb1.covers(&bb2));
+    assert!(bb1.approx_covers(&bb2, 1e-3, 0));
+    assert!(!bb1.approx_covers(&bb2, 1e-6, 0));
     ```
 
     # Features
 
-    This function uses the [`ulps_eq`](https://docs.rs/approx/latest/approx/macro.ulps_eq.html)
-    macro of the [approx] crate, therefore the `approx ` feature needs to be enabled.
+    This function uses the [`ulps_eq`] macro of the [approx] crate, therefore
+    the `approx` feature needs to be enabled.
     */
     #[cfg(feature = "approx")]
-    pub fn approx_contains(&self, other: &Self, epsilon: f64, max_ulps: u32) -> bool {
+    pub fn approx_covers(&self, other: &Self, epsilon: f64, max_ulps: u32) -> bool {
         return (self.xmin < other.xmin
             || ulps_eq!(
                 self.xmin,
@@ -550,14 +606,65 @@ impl BoundingBox {
     }
 
     /**
+    Returns true if `self` contains `other`.
+
+    A bounding box "contains" another bounding box, if every point covered by
+    the second box is also contained within the first one according to the
+    definitions given in [`BoundingBox::covers_point`] and
+    [`BoundingBox::contains_point`]:
+
+    `self.xmin() < other.xmin() <= other.xmax() < self.xmax()`
+
+    `self.ymin() < other.ymin() <= other.ymax() < self.ymax()`
+
+    If the boundaries of `self` should be excluded, use [`BoundingBox::covers`]
+    instead.
+
+    If the feature flag `approx` is enabled, the method
+    [`BoundingBox::approx_covers] is made available, which allows
+    providing tolerances for the aforementioned inequalities.
+
+    # Examples
+    ```
+    use bounding_box::BoundingBox;
+
+    // bb1 contains bb2, but not the other way around
+    let bb1 = BoundingBox::new(0.0, 1.0, 0.0, 1.0);
+    let bb2 = BoundingBox::new(0.2, 0.8, 0.2, 0.8);
+    assert!(bb1.contains(&bb2));
+    assert!(!bb2.contains(&bb1));
+
+    // bb1 does not contain itself
+    assert!(!bb1.contains(&bb1));
+
+    // bb1 and bb2 share a border
+    let bb1 = BoundingBox::new(0.0, 1.0, 0.0, 1.0);
+    let bb2 = BoundingBox::new(0.2, 1.0, 0.2, 0.8);
+    assert!(!bb1.contains(&bb2));
+
+    // bb1 and bb2 are separated from each other, and therefore neither one contains the other
+    let bb1 = BoundingBox::new(0.0, 1.0, 0.0, 1.0);
+    let bb2 = BoundingBox::new(2.0, 3.0, 2.0, 3.0);
+    assert!(!bb1.contains(&bb2));
+    assert!(!bb2.contains(&bb1));
+    ```
+    */
+    pub fn contains(&self, other: &Self) -> bool {
+        return self.xmin < other.xmin
+            && self.ymin < other.ymin
+            && self.xmax > other.xmax
+            && self.ymax > other.ymax;
+    }
+
+    /**
     Check if the two bounding boxes are approximately equal.
-    This check is performed using the [`ulps_eq`](https://docs.rs/approx/latest/approx/macro.ulps_eq.html)
-    macro of the [approx] crate. Please see its documentation.
+
+    This check is performed using the [`ulps_eq`] macro of the [approx] crate.
 
     ```
     use bounding_box::BoundingBox;
 
-    // bb1 contains bb2 depending on the selected tolerances
+    // bb1 covers bb2 depending on the selected tolerances
     let bb1 = BoundingBox::new(0.0, 1.0, 0.0, 1.0);
     let bb2 = BoundingBox::new(0.0, 1.0001, 0.0, 1.0);
 
@@ -597,9 +704,11 @@ impl BoundingBox {
     }
 
     /**
-    Returns true if the bounding boxes intersect.
+    Returns true if the bounding boxes intersect, i.e. if they both
+    [cover](BoundingBox::covers) at least one common point.
 
-    The boxes are NOT intersecting if they are just [touching](BoundingBox::touches).
+    The boxes are intersecting if they are just
+    [touching](BoundingBox::touches).
 
     # Examples
     ```
@@ -625,13 +734,57 @@ impl BoundingBox {
     let bb2 = BoundingBox::new(0.2, 1.0, 0.2, 0.8);
     assert!(bb2.intersects(&bb1));
 
-    // bb1 touches bb2 => no intersection
+    // bb1 touches bb2 => intersection
     let bb1 = BoundingBox::new(0.0, 1.0, 0.0, 1.0);
     let bb2 = BoundingBox::new(1.0, 2.0, 0.0, 1.0);
-    assert!(!bb2.intersects(&bb1));
+    assert!(bb2.intersects(&bb1));
     ```
      */
     pub fn intersects(&self, other: &Self) -> bool {
+        return self.xmin() <= other.xmax()
+            && other.xmin() <= self.xmax()
+            && self.ymin() <= other.ymax()
+            && other.ymin() <= self.ymax();
+    }
+
+    /**
+    Returns true if the bounding boxes overlap, i.e. if they both
+    [contain](BoundingBox::contains) at least one common point.
+
+    The boxes are NOT intersecting if they are just
+    [touching](BoundingBox::touches).
+
+    # Examples
+    ```
+    use bounding_box::BoundingBox;
+
+    // bb1 and bb2 overlap
+    let bb1 = BoundingBox::new(0.0, 1.0, 0.0, 1.0);
+    let bb2 = BoundingBox::new(-1.0, 1.0, 0.2, 0.8);
+    assert!(bb1.overlaps(&bb2));
+
+     // bb1 and bb2 do not overlap
+    let bb1 = BoundingBox::new(-1.0, 3.5, 2.0, 3.0);
+    let bb2 = BoundingBox::new(-5.0, 2.5, -1.0, 1.0);
+    assert!(!bb1.overlaps(&bb2));
+
+    // bb2 is contained in bb1
+    let bb1 = BoundingBox::new(0.0, 1.0, 0.0, 1.0);
+    let bb2 = BoundingBox::new(0.2, 1.0, 0.2, 0.8);
+    assert!(bb1.overlaps(&bb2));
+
+    // bb1 is contained in bb2
+    let bb1 = BoundingBox::new(0.0, 1.0, 0.0, 1.0);
+    let bb2 = BoundingBox::new(0.2, 1.0, 0.2, 0.8);
+    assert!(bb2.overlaps(&bb1));
+
+    // bb1 touches bb2 => no overlapping
+    let bb1 = BoundingBox::new(0.0, 1.0, 0.0, 1.0);
+    let bb2 = BoundingBox::new(1.0, 2.0, 0.0, 1.0);
+    assert!(!bb2.overlaps(&bb1));
+    ```
+     */
+    pub fn overlaps(&self, other: &Self) -> bool {
         return self.xmin() < other.xmax()
             && other.xmin() < self.xmax()
             && self.ymin() < other.ymax()
@@ -641,7 +794,8 @@ impl BoundingBox {
     /**
     Check if the bounding boxes are touching.
 
-    The bounding boxes are touching if they share at least one extremum and are not intersecting each other.
+    The bounding boxes are touching if they share at least one extremum and are
+    not intersecting each other.
 
     # Examples
     ```
@@ -663,7 +817,7 @@ impl BoundingBox {
     ```
      */
     pub fn touches(&self, other: &Self) -> bool {
-        if self.intersects(&other) {
+        if self.overlaps(&other) {
             return false;
         } else {
             return self.xmin() == other.xmax()
@@ -700,7 +854,7 @@ impl BoundingBox {
     */
     #[cfg(feature = "approx")]
     pub fn approx_touches(&self, other: &Self, epsilon: f64, max_ulps: u32) -> bool {
-        if self.intersects(&other) {
+        if self.overlaps(&other) {
             return false;
         } else {
             return ulps_eq!(
@@ -908,10 +1062,11 @@ impl From<&'_ [f64; 2]> for BoundingBox {
 }
 
 /**
-This trait provides an associated method
-[`bounding_box`](ToBoundingBox::bounding_box) for all types `T` which
-implement [`Into<BoundingBox>`] for a shared reference `T` and therefore avoids
-typing `BoundingBox::from(&T)`:
+This trait provides a standardized way of deriving a [`BoundingBox`] from
+another type `T `with the [`bounding_box`](ToBoundingBox::bounding_box) method.
+
+Implementing [`ToBoundingBox`] also auto-implements a [`From<&T>`] implementation
+for [`BoundingBox`].
 
 ```
 use bounding_box::{BoundingBox, ToBoundingBox};
@@ -921,21 +1076,18 @@ struct Circle {
     radius: f64
 }
 
-impl From<&Circle> for BoundingBox {
-    fn from(c: &Circle) -> BoundingBox {
-        return BoundingBox::new(c.center[0] - c.radius,
-                                c.center[0] + c.radius,
-                                c.center[1] - c.radius,
-                                c.center[1] + c.radius);
+impl ToBoundingBox for Circle {
+    fn bounding_box(&self) -> BoundingBox {
+        return BoundingBox::new(self.center[0] - self.radius,
+                                self.center[0] + self.radius,
+                                self.center[1] - self.radius,
+                                self.center[1] + self.radius);
     }
 }
 
 let c = Circle {center: [0.0, 0.0], radius: 1.0};
 assert_eq!(c.bounding_box(), BoundingBox::from(&c));
 ```
-
-Of course this trait can also be implemented manually, but it is heavily
-recommended to instead implement `From<&T> for BoundingBox` instead.
  */
 pub trait ToBoundingBox {
     /**
@@ -951,12 +1103,12 @@ pub trait ToBoundingBox {
         radius: f64
     }
 
-    impl From<&Circle> for BoundingBox {
-        fn from(c: &Circle) -> BoundingBox {
-            return BoundingBox::new(c.center[0] - c.radius,
-                                    c.center[0] + c.radius,
-                                    c.center[1] - c.radius,
-                                    c.center[1] + c.radius);
+    impl ToBoundingBox for Circle {
+        fn bounding_box(&self) -> BoundingBox {
+            return BoundingBox::new(self.center[0] - self.radius,
+                                    self.center[0] + self.radius,
+                                    self.center[1] - self.radius,
+                                    self.center[1] + self.radius);
         }
     }
 
@@ -971,11 +1123,8 @@ pub trait ToBoundingBox {
     fn bounding_box(&self) -> BoundingBox;
 }
 
-impl<T> ToBoundingBox for T
-where
-    for<'a> &'a T: Into<BoundingBox>,
-{
-    fn bounding_box(&self) -> BoundingBox {
-        self.into()
+impl<T: ToBoundingBox> From<&T> for BoundingBox {
+    fn from(value: &T) -> Self {
+        value.bounding_box()
     }
 }

@@ -28,15 +28,15 @@ fn test_intersects() {
 }
 
 #[test]
-fn test_contains() {
+fn test_covers() {
     let bb1 = BoundingBox::new(0.0, 1.0, 0.0, 1.0);
     let bb2 = BoundingBox::new(-0.5, 1.5, -0.5, 1.5);
-    assert!(bb2.contains(&bb1));
-    assert!(!bb1.contains(&bb2));
+    assert!(bb2.covers(&bb1));
+    assert!(!bb1.covers(&bb2));
 
     let bb1 = BoundingBox::new(0.0, 1.0, 0.0, 1.0);
     let bb2 = BoundingBox::new(0.2, 1.0, 0.2, 0.8);
-    assert!(bb1.contains(&bb2));
+    assert!(bb1.covers(&bb2));
 }
 
 #[test]
@@ -101,12 +101,12 @@ fn test_impl_to_bounding_box() {
 }
 
 #[test]
-fn test_contains_point() {
+fn test_covers_point() {
     let bb = BoundingBox::new(0.0, 1.0, 0.0, 1.0);
-    assert!(bb.contains_point([0.0, 0.0]));
-    assert!(!bb.contains_point([2.0, 0.0]));
-    assert!(!bb.contains_point([2.0, 2.0]));
-    assert!(bb.contains_point([0.7, 0.9]));
+    assert!(bb.covers_point([0.0, 0.0]));
+    assert!(!bb.covers_point([2.0, 0.0]));
+    assert!(!bb.covers_point([2.0, 2.0]));
+    assert!(bb.covers_point([0.7, 0.9]));
 }
 
 #[test]
@@ -114,8 +114,8 @@ fn test_from_nalgebra() {
     use nalgebra::{Point2, Vector2};
 
     let bb = BoundingBox::new(0.0, 1.0, 0.0, 1.0);
-    assert!(bb.contains_point(Point2::new(0.0, 0.0)));
-    assert!(bb.contains_point(Vector2::new(0.0, 0.0)));
+    assert!(bb.covers_point(Point2::new(0.0, 0.0)));
+    assert!(bb.covers_point(Vector2::new(0.0, 0.0)));
 }
 
 #[test]
@@ -162,13 +162,13 @@ fn test_to_bounding_box() {
         radius: f64,
     }
 
-    impl From<&Circle> for BoundingBox {
-        fn from(c: &Circle) -> BoundingBox {
+    impl ToBoundingBox for Circle {
+        fn bounding_box(&self) -> BoundingBox {
             return BoundingBox::new(
-                c.center[0] - c.radius,
-                c.center[0] + c.radius,
-                c.center[1] - c.radius,
-                c.center[1] + c.radius,
+                self.center[0] - self.radius,
+                self.center[0] + self.radius,
+                self.center[1] - self.radius,
+                self.center[1] + self.radius,
             );
         }
     }

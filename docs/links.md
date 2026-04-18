@@ -7,8 +7,8 @@ modify the components. -->
 
 [`ToBoundingBox`]: https://docs.rs/bounding_box/{{VERSION}}/bounding_box/trait.ToBoundingBox.html
 [`BoundingBox`]: https://docs.rs/bounding_box/{{VERSION}}/bounding_box/struct.BoundingBox.html
-[`contains_point`]: https://docs.rs/bounding_box/{{VERSION}}/bounding_box/struct.BoundingBox.html#method.contains_point
-[`approx_contains_point`]: https://docs.rs/bounding_box/0.4.1/bounding_box/struct.BoundingBox.html#method.approx_contains_point
+[`covers_point`]: https://docs.rs/bounding_box/{{VERSION}}/bounding_box/struct.BoundingBox.html#method.covers_point
+[`approx_covers_point`]: https://docs.rs/bounding_box/0.4.1/bounding_box/struct.BoundingBox.html#method.approx_covers_point
 
 [![Documentation](https://docs.rs/bounding_box/badge.svg)](https://docs.rs/bounding_box)
 
