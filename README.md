@@ -5,16 +5,16 @@ bounding_box
 docs/main.md and (if available docs/end.md). Do not modify this file, instead
 modify the components. -->
 
-[`ToBoundingBox`]: https://docs.rs/bounding_box/0.5.0/bounding_box/trait.ToBoundingBox.html
-[`BoundingBox`]: https://docs.rs/bounding_box/0.5.0/bounding_box/struct.BoundingBox.html
-[`covers_point`]: https://docs.rs/bounding_box/0.5.0/bounding_box/struct.BoundingBox.html#method.covers_point
-[`approx_covers_point`]: https://docs.rs/bounding_box/0.4.1/bounding_box/struct.BoundingBox.html#method.approx_covers_point
+[`ToBoundingBox`]: https://docs.rs/bounding_box/0.5.1/bounding_box/trait.ToBoundingBox.html
+[`BoundingBox`]: https://docs.rs/bounding_box/0.5.1/bounding_box/struct.BoundingBox.html
+[`covers_point`]: https://docs.rs/bounding_box/0.5.1/bounding_box/struct.BoundingBox.html#method.covers_point
+[`approx_covers_point`]: https://docs.rs/bounding_box/0.5.1/bounding_box/struct.BoundingBox.html#method.approx_covers_point
 
 [![Documentation](https://docs.rs/bounding_box/badge.svg)](https://docs.rs/bounding_box)
 
 A library for rectilinear, 2-dimensional bounding boxes.
 
-The full API documentation is available at https://docs.rs/bounding_box/0.5.0/bounding_box.
+The full API documentation is available at https://docs.rs/bounding_box/0.5.1/bounding_box.
 
 > **Feedback welcome!**  
 > Found a bug, missing docs, or have a feature request?  
@@ -142,12 +142,19 @@ assert_eq!(bb_all_pts.ymax(), 1.0);
 
 All features are disabled by default.
 
-## Serialization and deserialization
+## Serialization and deserialization with serde
 
 Bounding boxes can be serialized and deserialized using the
 [serde](https://crates.io/crates/serde) crate.
 
 This functionality is gated behind the `serde` feature flag.
+
+## Serialization and deserialization with bincode
+
+Bounding boxes can be serialized and deserialized using the
+[bincode](https://crates.io/crates/serde) crate.
+
+This functionality is gated behind the `bincode` feature flag.
 
 ## Tolerances
 

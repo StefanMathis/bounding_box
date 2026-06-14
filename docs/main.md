@@ -124,12 +124,19 @@ assert_eq!(bb_all_pts.ymax(), 1.0);
 
 All features are disabled by default.
 
-## Serialization and deserialization
+## Serialization and deserialization with serde
 
 Bounding boxes can be serialized and deserialized using the
 [serde](https://crates.io/crates/serde) crate.
 
 This functionality is gated behind the `serde` feature flag.
+
+## Serialization and deserialization with bincode
+
+Bounding boxes can be serialized and deserialized using the
+[bincode](https://crates.io/crates/serde) crate.
+
+This functionality is gated behind the `bincode` feature flag.
 
 ## Tolerances
 

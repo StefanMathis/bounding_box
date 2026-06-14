@@ -35,7 +35,9 @@ copy, hence it implements the
 
 # Features
 
-This struct can be serialized / deserialized if the `serde` feature is enabled.
+This struct can be serialized / deserialized with serde if the `serde` feature
+is enabled. Additionally, it can be serialized / deserialized with bincode if
+the `bincode` feature is enabled.
  */
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
