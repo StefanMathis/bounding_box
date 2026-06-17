@@ -5,16 +5,16 @@ bounding_box
 docs/main.md and (if available docs/end.md). Do not modify this file, instead
 modify the components. -->
 
-[`ToBoundingBox`]: https://docs.rs/bounding_box/0.5.1/bounding_box/trait.ToBoundingBox.html
-[`BoundingBox`]: https://docs.rs/bounding_box/0.5.1/bounding_box/struct.BoundingBox.html
-[`covers_point`]: https://docs.rs/bounding_box/0.5.1/bounding_box/struct.BoundingBox.html#method.covers_point
-[`approx_covers_point`]: https://docs.rs/bounding_box/0.5.1/bounding_box/struct.BoundingBox.html#method.approx_covers_point
+[`ToBoundingBox`]: https://docs.rs/bounding_box/0.6.0/bounding_box/trait.ToBoundingBox.html
+[`BoundingBox`]: https://docs.rs/bounding_box/0.6.0/bounding_box/struct.BoundingBox.html
+[`covers_point`]: https://docs.rs/bounding_box/0.6.0/bounding_box/struct.BoundingBox.html#method.covers_point
+[`approx_covers_point`]: https://docs.rs/bounding_box/0.6.0/bounding_box/struct.BoundingBox.html#method.approx_covers_point
 
 [![Documentation](https://docs.rs/bounding_box/badge.svg)](https://docs.rs/bounding_box)
 
 A library for rectilinear, 2-dimensional bounding boxes.
 
-The full API documentation is available at https://docs.rs/bounding_box/0.5.1/bounding_box.
+The full API documentation is available at https://docs.rs/bounding_box/0.6.0/bounding_box.
 
 > **Feedback welcome!**  
 > Found a bug, missing docs, or have a feature request?  
@@ -158,10 +158,10 @@ This functionality is gated behind the `bincode` feature flag.
 
 ## Tolerances
 
-Some methods of [`BoundingBox`] are gated behind the  `approx ` feature flag.
-Enabling this flag adds the [approxim](https://crates.io/crates/approxim) crate as a
-dependency. The gated methods are prefixed with `approx_` and are variants of
-other methods which habe absolute and ULPs (units of least precision) tolerances
-as additional arguments. For example, [`approx_covers_point`] is the tolerance 
-variant of [`covers_point`] and checks if a given point is *approximately*
-covered by the bounding box.
+Some methods of [`BoundingBox`] are gated behind the `approx ` feature flag.
+Enabling this flag adds the [approxim](https://crates.io/crates/approxim) crate
+as a dependency. The gated methods are prefixed with `approx_` and are variants
+of other methods which have an absolute tolerance `epsilon` as an additional
+argument. For example, [`approx_covers_point`] is the tolerance variant of
+[`covers_point`] and checks if a given point is *approximately* covered by the
+bounding box.

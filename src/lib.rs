@@ -11,7 +11,7 @@ A library for rectilinear, 2-dimensional bounding boxes.
 #![deny(missing_docs)]
 
 #[cfg(feature = "approx")]
-use approx::ulps_eq;
+use approx::abs_diff_eq;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -428,11 +428,11 @@ impl BoundingBox {
     }
 
     /**
-    Like [`BoundingBox::covers_point`], but with absolute and ULPs tolerances.
+    Like [`BoundingBox::covers_point`], but with an absolute tolerance
+    `epsilon`.
 
     This variant of [`BoundingBox::covers_point`] allows specifying an absolute
-    and an [ULP](https://en.wikipedia.org/wiki/Unit_in_the_last_place)
-    tolerance. These tolerances  are used to check if the given point lies
+    tolerance `epsilon` which is used to check if the given point lies
     "approximately" on an edge of the bounding box.
 
     # Examples
@@ -445,33 +445,24 @@ impl BoundingBox {
     assert!(!bb.covers_point([1.0001, 1.0]));
 
     // Check using tolerances: Point is inside bounding box
-    assert!(bb.approx_covers_point([1.0001, 1.0], 1e-3, 0));
+    assert!(bb.approx_covers_point([1.0001, 1.0], 1e-3));
 
     // Check using a finer tolerance: Point is outside the bounding box
-    assert!(!bb.approx_covers_point([1.0001, 1.0], 1e-6, 0));
+    assert!(!bb.approx_covers_point([1.0001, 1.0], 1e-6));
     ```
 
     # Features
 
-    This function uses the [`ulps_eq`] macro of the [approx] crate, therefore
-    the `approx` feature needs to be enabled.
+    This function uses the [`abs_diff_eq`] macro of the [approx] crate,
+    therefore the `approx` feature needs to be enabled.
      */
     #[cfg(feature = "approx")]
-    pub fn approx_covers_point<T: Into<[f64; 2]>>(
-        &self,
-        point: T,
-        epsilon: f64,
-        max_ulps: u32,
-    ) -> bool {
+    pub fn approx_covers_point<T: Into<[f64; 2]>>(&self, point: T, epsilon: f64) -> bool {
         let point: [f64; 2] = point.into();
-        return (self.xmin < point[0]
-            || ulps_eq!(self.xmin, point[0], epsilon = epsilon, max_ulps = max_ulps))
-            && (self.ymin < point[1]
-                || ulps_eq!(self.ymin, point[1], epsilon = epsilon, max_ulps = max_ulps))
-            && (self.xmax > point[0]
-                || ulps_eq!(self.xmax, point[0], epsilon = epsilon, max_ulps = max_ulps))
-            && (self.ymax > point[1]
-                || ulps_eq!(self.ymax, point[1], epsilon = epsilon, max_ulps = max_ulps));
+        return (self.xmin < point[0] || abs_diff_eq!(self.xmin, point[0], epsilon = epsilon))
+            && (self.ymin < point[1] || abs_diff_eq!(self.ymin, point[1], epsilon = epsilon))
+            && (self.xmax > point[0] || abs_diff_eq!(self.xmax, point[0], epsilon = epsilon))
+            && (self.ymax > point[1] || abs_diff_eq!(self.ymax, point[1], epsilon = epsilon));
     }
 
     /**
@@ -557,11 +548,10 @@ impl BoundingBox {
     }
 
     /**
-    Like [`BoundingBox::covers`], but with absolute and ULPs tolerances.
+    Like [`BoundingBox::covers`], but with an absolute tolerance `epsilon`.
 
-    This variant of [`BoundingBox::covers`] allows specifying an absolute and
-    an [ULP](https://en.wikipedia.org/wiki/Unit_in_the_last_place) tolerance.
-    These tolerances are used to check if the extremas of the boxes are
+    This variant of [`BoundingBox::covers`] allows specifying an absolute
+    tolerance `epsilon`, which is used to check if the extremas of the boxes are
     "approximately" equal.
 
     ```
@@ -572,45 +562,21 @@ impl BoundingBox {
     let bb2 = BoundingBox::new(0.0, 1.0001, 0.0, 0.5);
 
     assert!(!bb1.covers(&bb2));
-    assert!(bb1.approx_covers(&bb2, 1e-3, 0));
-    assert!(!bb1.approx_covers(&bb2, 1e-6, 0));
+    assert!(bb1.approx_covers(&bb2, 1e-3));
+    assert!(!bb1.approx_covers(&bb2, 1e-6));
     ```
 
     # Features
 
-    This function uses the [`ulps_eq`] macro of the [approx] crate, therefore
-    the `approx` feature needs to be enabled.
+    This function uses the [`abs_diff_eq`] macro of the [approx] crate,
+    therefore the `approx` feature needs to be enabled.
     */
     #[cfg(feature = "approx")]
-    pub fn approx_covers(&self, other: &Self, epsilon: f64, max_ulps: u32) -> bool {
-        return (self.xmin < other.xmin
-            || ulps_eq!(
-                self.xmin,
-                other.xmin,
-                epsilon = epsilon,
-                max_ulps = max_ulps
-            ))
-            && (self.ymin < other.ymin
-                || ulps_eq!(
-                    self.ymin,
-                    other.ymin,
-                    epsilon = epsilon,
-                    max_ulps = max_ulps
-                ))
-            && (self.xmax > other.xmax
-                || ulps_eq!(
-                    self.xmax,
-                    other.xmax,
-                    epsilon = epsilon,
-                    max_ulps = max_ulps
-                ))
-            && (self.ymax > other.ymax
-                || ulps_eq!(
-                    self.ymax,
-                    other.ymax,
-                    epsilon = epsilon,
-                    max_ulps = max_ulps
-                ));
+    pub fn approx_covers(&self, other: &Self, epsilon: f64) -> bool {
+        return (self.xmin < other.xmin || abs_diff_eq!(self.xmin, other.xmin, epsilon = epsilon,))
+            && (self.ymin < other.ymin || abs_diff_eq!(self.ymin, other.ymin, epsilon = epsilon,))
+            && (self.xmax > other.xmax || abs_diff_eq!(self.xmax, other.xmax, epsilon = epsilon,))
+            && (self.ymax > other.ymax || abs_diff_eq!(self.ymax, other.ymax, epsilon = epsilon,));
     }
 
     /**
@@ -665,9 +631,8 @@ impl BoundingBox {
     }
 
     /**
-    Check if the two bounding boxes are approximately equal.
-
-    This check is performed using the [`ulps_eq`] macro of the [approx] crate.
+    Check if the two bounding boxes are equal within an absolute tolerance
+    `epsilon`.
 
     ```
     use bounding_box::BoundingBox;
@@ -677,38 +642,21 @@ impl BoundingBox {
     let bb2 = BoundingBox::new(0.0, 1.0001, 0.0, 1.0);
 
     assert!(!bb1.eq(&bb2));
-    assert!(bb1.approx_eq(&bb2, 1e-3, 0));
-    assert!(!bb1.approx_eq(&bb2, 1e-6, 0));
+    assert!(bb1.approx_eq(&bb2, 1e-3));
+    assert!(!bb1.approx_eq(&bb2, 1e-6));
     ```
 
     # Features
 
-    This function uses the [`ulps_eq`](https://docs.rs/approx/latest/approx/macro.ulps_eq.html)
-    macro of the [approx] crate, therefore the `approx ` feature needs to be enabled.
+    This function uses the [`abs_diff_eq`] macro of the [approx] crate,
+    therefore the `approx` feature needs to be enabled.
      */
     #[cfg(feature = "approx")]
-    pub fn approx_eq(&self, other: &Self, epsilon: f64, max_ulps: u32) -> bool {
-        return ulps_eq!(
-            self.xmin(),
-            other.xmin(),
-            epsilon = epsilon,
-            max_ulps = max_ulps
-        ) && ulps_eq!(
-            self.xmax(),
-            other.xmax(),
-            epsilon = epsilon,
-            max_ulps = max_ulps
-        ) && ulps_eq!(
-            self.ymin(),
-            other.ymin(),
-            epsilon = epsilon,
-            max_ulps = max_ulps
-        ) && ulps_eq!(
-            self.ymax(),
-            other.ymax(),
-            epsilon = epsilon,
-            max_ulps = max_ulps
-        );
+    pub fn approx_eq(&self, other: &Self, epsilon: f64) -> bool {
+        return abs_diff_eq!(self.xmin(), other.xmin(), epsilon = epsilon)
+            && abs_diff_eq!(self.xmax(), other.xmax(), epsilon = epsilon)
+            && abs_diff_eq!(self.ymin(), other.ymin(), epsilon = epsilon)
+            && abs_diff_eq!(self.ymax(), other.ymax(), epsilon = epsilon);
     }
 
     /**
@@ -836,13 +784,11 @@ impl BoundingBox {
     }
 
     /**
-    Like [`BoundingBox::touches`], but with absolute and ULPs tolerances.
+    Like [`BoundingBox::touches`], but with an absolute tolerance `epsilon`.
 
-    This variant of [`BoundingBox::touches`] allows specifying an absolute and
-    an [ULP](https://en.wikipedia.org/wiki/Unit_in_the_last_place) tolerance. These tolerances
-    are used to check if the boxes share at least one extremas "approximately".
-    This check is performed using the [`ulps_eq`](https://docs.rs/approx/latest/approx/macro.ulps_eq.html)
-    macro of the [approx] crate. Please see its documentation.
+    This variant of [`BoundingBox::covers_point`] allows specifying an absolute
+    tolerance `epsilon` which is used to check if both boxes "approximately"
+    touch each other.
 
     # Examples
     ```
@@ -851,41 +797,24 @@ impl BoundingBox {
     let bb1 = BoundingBox::new(0.0, 1.0, 0.0, 1.0);
     let bb2 = BoundingBox::new(1.0001, 2.0, 0.0, 1.0);
     assert!(!bb1.touches(&bb2));
-    assert!(bb1.approx_touches(&bb2, 1e-3, 0));
-    assert!(!bb1.approx_touches(&bb2, 1e-6, 0));
+    assert!(bb1.approx_touches(&bb2, 1e-3));
+    assert!(!bb1.approx_touches(&bb2, 1e-6));
     ```
 
     # Features
 
-    This function uses the [`ulps_eq`](https://docs.rs/approx/latest/approx/macro.ulps_eq.html)
-    macro of the [approx] crate, therefore the `approx ` feature needs to be enabled.
+    This function uses the [`abs_diff_eq`] macro of the [approx] crate,
+    therefore the `approx` feature needs to be enabled.
     */
     #[cfg(feature = "approx")]
-    pub fn approx_touches(&self, other: &Self, epsilon: f64, max_ulps: u32) -> bool {
+    pub fn approx_touches(&self, other: &Self, epsilon: f64) -> bool {
         if self.overlaps(&other) {
             return false;
         } else {
-            return ulps_eq!(
-                self.xmin(),
-                other.xmax(),
-                epsilon = epsilon,
-                max_ulps = max_ulps
-            ) || ulps_eq!(
-                self.xmax(),
-                other.xmin(),
-                epsilon = epsilon,
-                max_ulps = max_ulps
-            ) || ulps_eq!(
-                self.ymin(),
-                other.ymax(),
-                epsilon = epsilon,
-                max_ulps = max_ulps
-            ) || ulps_eq!(
-                self.ymax(),
-                other.ymin(),
-                epsilon = epsilon,
-                max_ulps = max_ulps
-            );
+            return abs_diff_eq!(self.xmin(), other.xmax(), epsilon = epsilon)
+                || abs_diff_eq!(self.xmax(), other.xmin(), epsilon = epsilon)
+                || abs_diff_eq!(self.ymin(), other.ymax(), epsilon = epsilon)
+                || abs_diff_eq!(self.ymax(), other.ymin(), epsilon = epsilon);
         }
     }
 
@@ -1018,8 +947,9 @@ impl BoundingBox {
     /**
     Remove any singular dimensions by "buffering" them with `add_to_extr`.
 
-    The value `add_to_extr` is applied to both the minimum and the maximum value of a singular dimension.
-    For example, if the bounding box width is 0 (`xmin` = `xmax`) and `add_to_extr = 1.0`, the new width will be 2.0.
+    The value `add_to_extr` is applied to both the minimum and the maximum
+    value of a singular dimension. For example, if the bounding box width is 0
+    (`xmin` = `xmax`) and `add_to_extr = 1.0`, the new width will be 2.0.
 
     # Examples
     ```

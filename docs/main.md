@@ -140,10 +140,10 @@ This functionality is gated behind the `bincode` feature flag.
 
 ## Tolerances
 
-Some methods of [`BoundingBox`] are gated behind the  `approx ` feature flag.
-Enabling this flag adds the [approxim](https://crates.io/crates/approxim) crate as a
-dependency. The gated methods are prefixed with `approx_` and are variants of
-other methods which habe absolute and ULPs (units of least precision) tolerances
-as additional arguments. For example, [`approx_covers_point`] is the tolerance 
-variant of [`covers_point`] and checks if a given point is *approximately*
-covered by the bounding box.
+Some methods of [`BoundingBox`] are gated behind the `approx ` feature flag.
+Enabling this flag adds the [approxim](https://crates.io/crates/approxim) crate
+as a dependency. The gated methods are prefixed with `approx_` and are variants
+of other methods which have an absolute tolerance `epsilon` as an additional
+argument. For example, [`approx_covers_point`] is the tolerance variant of
+[`covers_point`] and checks if a given point is *approximately* covered by the
+bounding box.
